@@ -28,9 +28,8 @@ class menuItems(object):
 ROWS = 8
 COLS = 16
 flag_count = 0
-tiles_pressed = 0
 number_of_flags = 37 # 40 ordinarily
-
+tiles_pressed = 0
 # Create a grid of None to store the references to the tiles
 tiles = [[None for _ in range(COLS)] for _ in range(ROWS)]
 values = [[0 for _ in range(COLS)] for _ in range(ROWS)]
@@ -64,7 +63,6 @@ def create_board():
     values[1][8], values[2][8], values[3][8], values[4][8], values[4][9], values[4][10], values[3][10], values[2][10], values[1][10], values[1][9] = [-1] * 10
     # M
     values[1][12], values[1][14], values[2][12], values[2][13], values[2][14], values[3][12], values[3][14], values[4][12], values[4][14] = [-1] * 9
-
     # check surrounding for a given datapoint
     # where r = {0, ROWS-1} and c = {0, COLS-1}
     def count_surrounding(r, c):
@@ -121,21 +119,28 @@ def callback(event):
         # check to see if value is 0, make it clear
         val = "" if values[row][col] == 0 else values[row][col]
         tiles[row][col] = c.create_text(col*col_width + col_width/2, row*row_height + row_height/2, text=val, font=("Purisa", 18))
-        # tiles_pressed += 1
+        global tiles_pressed
+        tiles_pressed += 1
+        # clicked on a mine
+        if values[row][col] == -1:
+            print("game over")
+            app.destroy()
+
+
         # for this special program, we have 37 flags
-        # if tiles_pressed == (ROWS*COLS)-number_of_flags and flag_count == number_of_flags:
-        # win screen
-        imageBal = Image.open('balloon.jpg')
-        imageBal.paste(imageBal, (750, 750))
-        # Convert the Image object into a TkPhoto object
-        tkimage = ImageTk.PhotoImage(imageBal)
+        if tiles_pressed == (ROWS*COLS)-number_of_flags and flag_count == number_of_flags:
+            # win screen
+            imageBal = Image.open('balloon.jpg')
+            imageBal.paste(imageBal, (750, 750))
+            # Convert the Image object into a TkPhoto object
+            tkimage = ImageTk.PhotoImage(imageBal)
 
-        panel1 = tk.Label(app, image=tkimage)
-        panel1.grid(row=0, column=2)
+            panel1 = tk.Label(app, image=tkimage)
+            panel1.grid(row=0, column=2)
 
-        l = tk.Label(app,text="Campbell, will you go to prom with me?", font=("Purisa", 18))
-        l.place(x=300, y=300, anchor="center")
-        app.mainloop()
+            l = tk.Label(app,text="Campbell, will you go to prom with me?", font=("Purisa", 18))
+            l.place(x=300, y=300, anchor="center")
+            app.mainloop()
 
 
     # If the tile is filled, delete the rectangle and clear the reference
@@ -151,7 +156,7 @@ def flag(event):
     # Calculate column and row number
     col = int(event.x//col_width)
     row = int(event.y//row_height)
-
+    global flag_count
     if not tiles[row][col]:
         tiles[row][col] = c.create_text(col*col_width + col_width/2, row*row_height + row_height/2, text=emoji.emojize(":heart:", use_aliases=True), font=("Purisa", 24))
         # correctly placed flag
